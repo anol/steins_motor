@@ -5,14 +5,16 @@
 #include <NIDAQmx.h>
 #include <windows.h>
 
-class MotorController
+class MyDAQmxController
 {
 public:
-	MotorController();
-	~MotorController();
+	MyDAQmxController();
+	~MyDAQmxController();
 	int Start();
+	void printDebugInfo();
 	TaskHandle	taskPulsTeller;
 	TaskHandle	taskSpenningUt;
+	LARGE_INTEGER counterFrequency;
 
 };
 

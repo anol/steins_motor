@@ -1,10 +1,21 @@
 #include <iostream>
 #include "SteinsMotor_1.h"
-#include "MotorController.h"
+#include "MyDAQmxController.h"
 
 int main()
 {
-	MotorController motorController;
-    std::cout << "Steins Motor\n"; 
-	motorController.Start();
+	std::cout << "Steins Motor\n";
+	try {
+		MyDAQmxController motorController;
+		motorController.Start();
+	}
+	catch (int32 error) {
+		char errBuff[2048] = { '\0' };
+		if (DAQmxFailed(error))
+			DAQmxGetExtendedErrorInfo(errBuff, 2048);
+		if (DAQmxFailed(error))
+			printf("DAQmx Error: %s\n", errBuff);
+	}
+	std::cout << "End of program, press Enter key to quit\n";
+	getchar();
 }

@@ -18,7 +18,7 @@
     <ClCompile Include="SteinsMotor_1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MotorController.cpp">
+    <ClCompile Include="MyDAQmxController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,7 +26,7 @@
     <ClInclude Include="SteinsMotor_1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MotorController.h">
+    <ClInclude Include="MyDAQmxController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
