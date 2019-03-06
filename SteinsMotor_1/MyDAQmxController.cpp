@@ -27,25 +27,20 @@ MyDAQmxController::~MyDAQmxController() {
 }
 
 int MyDAQmxController::Start(double target) {
-	uInt32		oldValue = 0;
-	float64     spenningUt[1] = { 0.0 };
 	DAQmxErrChk(DAQmxStartTask(taskPulsTeller));
 	DAQmxErrChk(DAQmxStartTask(taskSpenningUt));
-	spenningUt[0] = 0.0;
+	getAntallPulser();
+	getElapsedMilliseconds();
 	for (int32 count = 0; count < 400; count++) {
-		uInt32 value;
-		DAQmxErrChk(DAQmxReadCounterScalarU32(taskPulsTeller, 10.0, &value, NULL));
+		double error = target - getAntallPulser();
 		double dt = getElapsedMilliseconds();
-		double error = target - value;
-		spenningUt[0] = pid.input(error, dt);
-		printf("% 4d: v=%.3f, e=%.3f, dt=%.3f \n",
-			(int)count, spenningUt[0], error, dt);
+		double spenningUt  = pid.input(error, dt);
+		printf("% 4d: v=%.3f, e=%.3f, dt=%.3f \n", (int)count, spenningUt , error, dt);
 		fflush(stdout);
-		DAQmxErrChk(DAQmxWriteAnalogF64(taskSpenningUt, 1, 1, 10.0, DAQmx_Val_GroupByChannel, spenningUt, NULL, NULL));
+		setSpenningUt(spenningUt);
 		Sleep(199);
 	}
-	spenningUt[0] = 0.0;
-	DAQmxErrChk(DAQmxWriteAnalogF64(taskSpenningUt, 1, 1, 10.0, DAQmx_Val_GroupByChannel, spenningUt, NULL, NULL));
+	setSpenningUt(0.0);
 	return 0;
 }
 
@@ -57,6 +52,20 @@ double MyDAQmxController::getElapsedMilliseconds() {
 	oldPerformanceCount = performanceCount;
 	double dt = ((double)elapsedTime.QuadPart) / ((double)counterFrequency.QuadPart);
 	return dt;
+}
+
+double MyDAQmxController::getAntallPulser() {
+	double antall;
+	uInt32 pulse_count;
+	DAQmxErrChk(DAQmxReadCounterScalarU32(taskPulsTeller, 10.0, &pulse_count, NULL));
+	antall = pulse_count - old_pulse_count;
+	old_pulse_count = pulse_count;
+	return antall;
+}
+
+void MyDAQmxController::setSpenningUt(double spenning) {
+	float64     spenningUt[1] = { spenning };
+	DAQmxErrChk(DAQmxWriteAnalogF64(taskSpenningUt, 1, 1, 10.0, DAQmx_Val_GroupByChannel, spenningUt, NULL, NULL));
 }
 
 void MyDAQmxController::printDebugInfo() {
