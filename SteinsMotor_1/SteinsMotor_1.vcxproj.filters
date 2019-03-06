@@ -21,12 +21,18 @@
     <ClCompile Include="MyDAQmxController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PIDcontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SteinsMotor_1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MyDAQmxController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PIDcontroller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

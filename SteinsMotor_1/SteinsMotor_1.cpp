@@ -7,7 +7,7 @@ int main()
 	std::cout << "Steins Motor\n";
 	try {
 		MyDAQmxController motorController;
-		motorController.Start();
+		motorController.Start(10.0);
 	}
 	catch (int32 error) {
 		char errBuff[2048] = { '\0' };

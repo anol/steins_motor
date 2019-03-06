@@ -1,9 +1,10 @@
 #include "MyDAQmxController.h"
 
-int32 error = 0;
-#define DAQmxErrChk(functionCall) if( DAQmxFailed(error=(functionCall)) ) throw error; 
+int32 myDAQmxErrorCode = 0;
+#define DAQmxErrChk(functionCall) if( DAQmxFailed(myDAQmxErrorCode=(functionCall)) ) throw myDAQmxErrorCode; 
 
 MyDAQmxController::MyDAQmxController() {
+	oldPerformanceCount = { 0 };
 	QueryPerformanceFrequency(&counterFrequency);
 	printDebugInfo();
 	DAQmxErrChk(DAQmxCreateTask("PulsTeller", &taskPulsTeller));
@@ -25,36 +26,37 @@ MyDAQmxController::~MyDAQmxController() {
 	}
 }
 
-int MyDAQmxController::Start() {
-	uInt32      value;
+int MyDAQmxController::Start(double target) {
 	uInt32		oldValue = 0;
 	float64     spenningUt[1] = { 0.0 };
-	LARGE_INTEGER oldPerformanceCount = { 0 };
 	DAQmxErrChk(DAQmxStartTask(taskPulsTeller));
 	DAQmxErrChk(DAQmxStartTask(taskSpenningUt));
 	spenningUt[0] = 0.0;
 	for (int32 count = 0; count < 400; count++) {
-		LARGE_INTEGER elapsedTime;
-		LARGE_INTEGER performanceCount;
-		spenningUt[0] += 0.01;
+		uInt32 value;
 		DAQmxErrChk(DAQmxReadCounterScalarU32(taskPulsTeller, 10.0, &value, NULL));
-		QueryPerformanceCounter(&performanceCount);
-		elapsedTime.QuadPart = (performanceCount.QuadPart - oldPerformanceCount.QuadPart);
-
-		printf("%d - %1.2F - %d - %d \n",
-			count,
-			spenningUt[0],
-			value - oldValue,
-			(1000 * elapsedTime.QuadPart) / counterFrequency.QuadPart);
+		double dt = getElapsedMilliseconds();
+		double error = target - value;
+		spenningUt[0] = pid.input(error, dt);
+		printf("% 4d: v=%.3f, e=%.3f, dt=%.3f \n",
+			(int)count, spenningUt[0], error, dt);
 		fflush(stdout);
-		oldValue = value;
-		oldPerformanceCount = performanceCount;
 		DAQmxErrChk(DAQmxWriteAnalogF64(taskSpenningUt, 1, 1, 10.0, DAQmx_Val_GroupByChannel, spenningUt, NULL, NULL));
 		Sleep(199);
 	}
 	spenningUt[0] = 0.0;
 	DAQmxErrChk(DAQmxWriteAnalogF64(taskSpenningUt, 1, 1, 10.0, DAQmx_Val_GroupByChannel, spenningUt, NULL, NULL));
 	return 0;
+}
+
+double MyDAQmxController::getElapsedMilliseconds() {
+	LARGE_INTEGER elapsedTime;
+	LARGE_INTEGER performanceCount;
+	QueryPerformanceCounter(&performanceCount);
+	elapsedTime.QuadPart = (performanceCount.QuadPart - oldPerformanceCount.QuadPart);
+	oldPerformanceCount = performanceCount;
+	double dt = ((double)elapsedTime.QuadPart) / ((double)counterFrequency.QuadPart);
+	return dt;
 }
 
 void MyDAQmxController::printDebugInfo() {

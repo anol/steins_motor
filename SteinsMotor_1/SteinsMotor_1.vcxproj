@@ -160,10 +160,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MyDAQmxController.cpp" />
+    <ClCompile Include="PIDcontroller.cpp" />
     <ClCompile Include="SteinsMotor_1.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MyDAQmxController.h" />
+    <ClInclude Include="PIDcontroller.h" />
     <ClInclude Include="SteinsMotor_1.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
